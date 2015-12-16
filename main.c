@@ -159,6 +159,7 @@ int main (void)
         homearray[l] = fabs (varray[l]);
         approxarray[l] = fabs (karray[l]);
     }
+    //calculate and print timing and time ratios for each of the methods
     printf ("\nTiming for the different methods:\n");
     print_timing (tvegas, thome, tapprox);
     printf
@@ -166,14 +167,30 @@ int main (void)
         tvegas / thome, tvegas / tapprox, thome / tapprox);
     plot (distance, vegasarray, homearray, approxarray, N);
 
-
+    //error calculations 
     printf ("Distance      Vegas Error       Home-made Error\n");
     for (int h = 0; h < N; h++)
     {
         printf ("%.6f      %.6f      %.6f\n", distance[h], vegas_error[h],
             fabs (homearray[h] - vegasarray[h]));
     }
-
+    //calculating average error for vegas and home-made
+    double home_error_total = 0., GSL_error_total = 0.;;
+	for(int ph = 0; ph < N; ph++)
+	{
+		home_error_total += fabs(homearray[ph] - vegasarray[ph]);
+		GSL_error_total += vegas_error[ph];
+	}
+	//calculating average error for vegas and home-made
+	double home_error_avg = home_error_total/N;
+	double GSL_error_avg = GSL_error_total/N;
+	printf("\nAverage error for Vegas integrator: %.6f\nAverage error for home made integrator: %.6f\n", GSL_error_avg, home_error_avg);
+	//using the ratio and the 1/sqrt(n) error dependence
+	//the time for home-made to achieve the same level of accuracy as vegas is estimated
+	double error_ratio = home_error_avg/GSL_error_avg;
+	printf("\nEstimated time needed for home-made integrator to reach same error as vegas: %.6f\n", thome*error_ratio*error_ratio);
+	
+	printf("\nThe home-made integrator will take %.6f more seconds to reach the same level of precision as the GSL vegas integrator\n", (thome*error_ratio*error_ratio)-tvegas);
     return 0;
 
 }
